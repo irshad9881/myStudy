@@ -1,7 +1,9 @@
 // sendOtp , signup , login ,  changePassword
 const User = require("./../models/user");
 const Profile = require("./../models/profile");
-const optGenerator = require("otp-generator");
+// const optGenerator = require("otp-generator");
+const otpGenerator = require("otp-generator");
+
 const OTP = require("../models/OTP");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -30,7 +32,7 @@ exports.sendOTP = async (req, res) => {
     }
 
     // generate Otp
-    const otp = optGenerator.generate(6, {
+    const otp = otpGenerator.generate(6, {
       upperCaseAlphabets: false,
       lowerCaseAlphabets: false,
       specialChars: false,
@@ -102,8 +104,8 @@ exports.signup = async (req, res) => {
     if (password !== confirmPassword) {
       return res.status(400).json({
         success: false,
-        messgae:
-          "passowrd & confirm password does not match, Please try again..!",
+        message:
+          "password & confirm password does not match, Please try again..!",
       });
     }
 
@@ -254,7 +256,7 @@ exports.login = async (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message,
-      messgae: "Error while Login user",
+      message: "Error while Login user",
     });
   }
 };
@@ -269,14 +271,14 @@ exports.changePassword = async (req, res) => {
     if (!oldPassword || !newPassword || !confirmNewPassword) {
       return res.status(403).json({
         success: false,
-        message: "All fileds are required",
+        message: "All fields are required",
       });
     }
 
     // get user
     const userDetails = await User.findById(req.user.id);
 
-    // validate old passowrd entered correct or not
+    // validate old password entered correct or not
     const isPasswordMatch = await bcrypt.compare(
       oldPassword,
       userDetails.password
@@ -331,15 +333,15 @@ exports.changePassword = async (req, res) => {
     // return success response
     res.status(200).json({
       success: true,
-      mesage: "Password changed successfully",
+      message: "Password changed successfully",
     });
   } catch (error) {
-    console.log("Error while changing passowrd");
+    console.log("Error while changing password");
     console.log(error);
     res.status(500).json({
       success: false,
       error: error.message,
-      messgae: "Error while changing passowrd",
+      message: "Error while changing password",
     });
   }
 };
