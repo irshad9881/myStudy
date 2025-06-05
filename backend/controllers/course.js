@@ -231,7 +231,7 @@ exports.getCourseDetails = async (req, res) => {
     let totalDurationInSeconds = 0;
     courseDetails.courseContent.forEach((content) => {
       content.subSection.forEach((subSection) => {
-        const timeDurationInSeconds = parseInt(subSection.timeDuration);
+        const timeDurationInSeconds = parseInt(subSection?.timeDuration || 0);
         totalDurationInSeconds += timeDurationInSeconds;
       });
     });
@@ -309,7 +309,7 @@ exports.getFullCourseDetails = async (req, res) => {
     let totalDurationInSeconds = 0;
     courseDetails.courseContent.forEach((content) => {
       content.subSection.forEach((subSection) => {
-        const timeDurationInSeconds = parseInt(subSection.timeDuration);
+        const timeDurationInSeconds = parseInt(subSection.timeDuration || 0);
         totalDurationInSeconds += timeDurationInSeconds;
       });
     });
@@ -469,24 +469,40 @@ exports.deleteCourse = async (req, res) => {
 
     // Delete sections and sub-sections
     const courseSections = course.courseContent;
-    for (const sectionId of courseSections) {
-      // Delete sub-sections of the section
-      const section = await Section.findById(sectionId);
-      if (section) {
-        const subSections = section.subSection;
-        for (const subSectionId of subSections) {
-          const subSection = await SubSection.findById(subSectionId);
-          if (subSection) {
-            await deleteResourceFromCloudinary(subSection?.videoUrl); // delete course videos From Cloudinary
-          }
-          await SubSection.findByIdAndDelete(subSectionId);
+    // for (const sectionId of courseSections) {
+    //   // Delete sub-sections of the section
+    //   const section = await Section.findById(sectionId);
+    //   if (section) {
+    //     const subSections = section.subSection;
+    //     for (const subSectionId of subSections) {
+    //       const subSection = await SubSection.findById(subSectionId);
+    //       if (subSection) {
+    //         await deleteResourceFromCloudinary(subSection?.videoUrl); // delete course videos From Cloudinary
+    //       }
+    //       await SubSection.findByIdAndDelete(subSectionId);
+    //     }
+    //   }
+
+    //   // Delete the section
+    //   await Section.findByIdAndDelete(sectionId);
+    // }
+    await Promise.all(
+      courseSections.map(async (sectionId) => {
+        const section = await Section.findById(sectionId);
+        if (section) {
+          await Promise.all(
+            section.subSection.map(async (subSectionId) => {
+              const subSection = await SubSection.findById(subSectionId);
+              if (subSection?.videoUrl) {
+                await deleteResourceFromCloudinary(subSection.videoUrl);
+              }
+              await SubSection.findByIdAndDelete(subSectionId);
+            })
+          );
         }
-      }
-
-      // Delete the section
-      await Section.findByIdAndDelete(sectionId);
-    }
-
+        await Section.findByIdAndDelete(sectionId);
+      })
+    );
     // Delete the course
     await Course.findByIdAndDelete(courseId);
 
