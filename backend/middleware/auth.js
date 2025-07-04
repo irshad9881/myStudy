@@ -10,13 +10,14 @@ exports.auth = (req, res, next) => {
     // extract token by anyone from this 3 ways
 
     const authHeader = req.header("Authorization");
+    // console.log("authHeader => ", authHeader);
     const token =
       req.body?.token ||
       req.cookies?.token ||
       (authHeader && authHeader.startsWith("Bearer ")
         ? authHeader.split(" ")[1]
         : null);
-
+    // console.log("token => ", token);
     // if token is missing
     if (!token) {
       return res.status(401).json({
@@ -37,7 +38,9 @@ exports.auth = (req, res, next) => {
       //     iat: 1699452446,
       //     exp: 1699538846
       //   }
+      console.log("decode => ", decode);
       req.user = decode;
+      next();
     } catch (error) {
       return res.status(401).json({
         success: false,
@@ -46,7 +49,7 @@ exports.auth = (req, res, next) => {
       });
     }
     // go to next middleware
-    next();
+    // next();
   } catch (error) {
     console.log("Error while token validating");
     console.log(error);
@@ -91,8 +94,6 @@ exports.isInstructor = (req, res, next) => {
     // go to next middleware
     next();
   } catch (error) {
-    // console.log(error);
-    checking;
     return res.status(500).json({
       success: false,
       error: error.message,
@@ -104,8 +105,12 @@ exports.isInstructor = (req, res, next) => {
 // ================ IS ADMIN ================
 exports.isAdmin = (req, res, next) => {
   try {
-    if (req.user.accountType != "Admin") {
-      return res.status(401).json({
+    if (req.user?.accountType != "Admin") {
+      // return res.status(401).json({
+      //   success: false,
+      //   message: "This Page is protected only for Admin",
+      // });
+      return res.status(403).json({
         success: false,
         message: "This Page is protected only for Admin",
       });

@@ -24,36 +24,65 @@ exports.createCourse = async (req, res) => {
       instructions: _instructions,
       status,
       tag: _tag,
+      thumbnail,
     } = req.body;
-
+    console.log("req.body = ", req.body);
     // Convert the tag and instructions from stringified Array to Array
     // const tag = JSON.parse(_tag);
     // const instructions = JSON.parse(_instructions);
-    if (typeof _tag !== "string" || typeof _instructions !== "string") {
-      return res.status(400).json({
-        success: false,
-        message: "Tag and Instructions must be valid JSON strings.",
-      });
-    }
-    let tag, instructions;
+    console.log("tag = ", _tag);
+    console.log("instructions = ", _instructions);
+    console.log("type of tag = ", typeof _tag);
+    console.log("type of instructions = ", typeof _instructions);
+    // if (typeof _tag !== "string" || typeof _instructions !== "string") {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Tag and Instructions must be valid JSON strings.",
+    //   });
+    // }
+    // let tag, instructions;
 
-    try {
-      tag = JSON.parse(_tag);
-      instructions = JSON.parse(_instructions);
-    } catch (parseError) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid JSON format in tag or instructions.",
-        error: parseError.message,
-      });
-    }
+    // try {
+    //   tag = Array.isArray(_tag) ? _tag : JSON.parse(_tag);
+    //   instructions = Array.isArray(_instructions)
+    //     ? _instructions
+    //     : JSON.parse(_instructions);
+    // } catch (parseError) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Invalid JSON format in tag or instructions.",
+    //     error: parseError.message,
+    //   });
+    // }
+    // Accept tag and instructions directly as array or string
+    let tag = _tag;
+    let instructions = _instructions;
 
-    // console.log("tag = ", tag)
-    // console.log("instructions = ", instructions)
+    // If accidentally sent as string (from form-data), parse it
+    if (typeof _tag === "string") {
+      try {
+        tag = JSON.parse(_tag);
+      } catch {
+        return res.status(400).json({
+          success: false,
+          message: "Tag must be a valid JSON array.",
+        });
+      }
+    }
+    if (typeof _instructions === "string") {
+      try {
+        instructions = JSON.parse(_instructions);
+      } catch {
+        return res.status(400).json({
+          success: false,
+          message: "Instructions must be a valid JSON array.",
+        });
+      }
+    }
 
     // get thumbnail of course
-    const thumbnail = req.files?.thumbnailImage;
-
+    //  thumbnail = req.files?.thumbnailImage;
+    // console.log("thumbnailImage = ", thumbnail);
     // validation
     if (
       !courseName ||
@@ -77,7 +106,7 @@ exports.createCourse = async (req, res) => {
     // check current user is instructor or not , bcoz only instructor can create
     // we have insert user id in req.user , (payload , while auth )
     const instructorId = req?.user.id;
-
+    console.log("instructorId = ", instructorId);
     // check given category is valid or not
     const categoryDetails = await Category.findById(category);
     if (!categoryDetails) {
@@ -88,11 +117,27 @@ exports.createCourse = async (req, res) => {
     }
 
     // upload thumbnail to cloudinary
-    const thumbnailDetails = await uploadImageToCloudinary(
-      thumbnail,
-      process.env.FOLDER_NAME
-    );
+    // const thumbnailDetails = await uploadImageToCloudinary(
+    //   thumbnail,
+    //   process.env.FOLDER_NAME
+    // );
+    let thumbnailDetails;
 
+    if (req.files?.thumbnailImage && req.files.thumbnailImage.tempFilePath) {
+      thumbnailDetails = await uploadImageToCloudinary(
+        req.files.thumbnailImage,
+        process.env.FOLDER_NAME
+      );
+    } else if (typeof req.body.thumbnail === "string") {
+      thumbnailDetails = { secure_url: req.body.thumbnail }; // use the URL directly
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Thumbnail image is required (upload a file or provide URL).",
+      });
+    }
+
+    console.log("thumbnailDetails = ", thumbnailDetails);
     // create new course - entry in DB
     const newCourse = await Course.create({
       courseName,
@@ -120,7 +165,7 @@ exports.createCourse = async (req, res) => {
     );
 
     // Add the new course to the Categories
-    await Category.findByIdAndUpdate(
+    const courseInsideCatorry = await Category.findByIdAndUpdate(
       { _id: category },
       {
         $push: {
@@ -129,7 +174,7 @@ exports.createCourse = async (req, res) => {
       },
       { new: true }
     );
-
+    console.log("courseInsideCatorry = ", courseInsideCatorry);
     // return response
     res.status(200).json({
       success: true,
@@ -137,8 +182,6 @@ exports.createCourse = async (req, res) => {
       message: "New Course created successfully",
     });
   } catch (error) {
-    // console.log('Error while creating new course');
-    // console.log(error);
     res.status(500).json({
       success: false,
       error: error.message,

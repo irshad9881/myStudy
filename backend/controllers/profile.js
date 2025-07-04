@@ -16,84 +16,93 @@ const { updateUserProfileImageService } = require("../services/profileService");
 const { getUserDetailsService } = require("../services/profileService");
 const { getInstructorDashboardService } = require("../services/profileService");
 
+// exports.updateProfile = async (req, res) => {
+//   try {
+//     const { error } = updateProfileSchema.validate(req.body);
+//     console.log("Validation error:", error);
+//     if (error)
+//       return res
+//         .status(400)
+//         .json({ success: false, message: error.details[0].message });
+
+//     const updatedUserDetails = await updateUserProfileService({
+//       userId: req.user.id,
+//       profileData: req.body,
+//     });
+//     console.log("Updated user details:", updatedUserDetails);
+//     res.status(200).json({
+//       success: true,
+//       updatedUserDetails,
+//       message: "Profile updated successfully",
+//     });
+//   } catch (err) {
+//     console.error("Error while updating profile:", err);
+//     res.status(500).json({
+//       success: false,
+//       message: "Internal server error",
+//       error: err.message,
+//     });
+//   }
+// };
+
 exports.updateProfile = async (req, res) => {
   try {
-    const { error } = updateProfileSchema.validate(req.body);
-    if (error)
-      return res
-        .status(400)
-        .json({ success: false, message: error.details[0].message });
+    // extract data
+    const {
+      gender = "",
+      dateOfBirth = "",
+      about = "",
+      contactNumber = "",
+      firstName,
+      lastName,
+    } = req.body;
+     console.log("Request body -> ", req.body);
+    // extract userId
+    const userId = req.user.id;
+   console.log("userId -> ", userId);
+    // find profile
+    const userDetails = await User.findById(userId);
+    console.log("userDetails -> ", userDetails);
+    const profileId = userDetails?.additionalDetails;
+    console.log("profileId -> ", profileId);
+    const profileDetails = await Profile.findById(profileId);
 
-    const updatedUserDetails = await updateUserProfileService({
-      userId: req.user.id,
-      profileData: req.body,
+    console.log('User profileDetails -> ', profileDetails);
+
+    // Update the profile fields
+    userDetails.firstName = firstName;
+    userDetails.lastName = lastName;
+    await userDetails.save();
+
+    profileDetails.gender = gender;
+    profileDetails.dateOfBirth = dateOfBirth;
+    profileDetails.about = about;
+    profileDetails.contactNumber = contactNumber;
+    console.log('Updated profileDetails  gender-> ', profileDetails.gender);
+    // save data to DB
+    await profileDetails.save();
+
+    const updatedUserDetails = await User.findById(userId).populate({
+      path: "additionalDetails",
     });
+    console.log('updatedUserDetails -> ', updatedUserDetails);
 
-    res.status(200).json({
+    // return response
+   return res.status(200).json({
       success: true,
       updatedUserDetails,
       message: "Profile updated successfully",
     });
-  } catch (err) {
-    console.error("Error while updating profile:", err);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: err.message,
+  } catch (error) {
+    console.log("Error while updating profile");
+    console.log(error);
+   return res.status(500).json({
+      success: false, 
+      error: error.message,
+      message: "Error while updating profile",
     });
   }
 };
-// exports.updateProfile = async (req, res) => {
-//     try {
-//         // extract data
-//         const { gender = '', dateOfBirth = "", about = "", contactNumber = '', firstName, lastName } = req.body;
-
-//         // extract userId
-//         const userId = req.user.id;
-
-//         // find profile
-//         const userDetails = await User.findById(userId);
-//         const profileId = userDetails.additionalDetails;
-//         const profileDetails = await Profile.findById(profileId);
-
-//         // console.log('User profileDetails -> ', profileDetails);
-
-//         // Update the profile fields
-//         userDetails.firstName = firstName;
-//         userDetails.lastName = lastName;
-//         await userDetails.save()
-
-//         profileDetails.gender = gender;
-//         profileDetails.dateOfBirth = dateOfBirth;
-//         profileDetails.about = about;
-//         profileDetails.contactNumber = contactNumber;
-
-//         // save data to DB
-//         await profileDetails.save();
-
-//         const updatedUserDetails = await User.findById(userId)
-//             .populate({
-//                 path: 'additionalDetails'
-//             })
-//         // console.log('updatedUserDetails -> ', updatedUserDetails);
-
-//         // return response
-//         res.status(200).json({
-//             success: true,
-//             updatedUserDetails,
-//             message: 'Profile updated successfully'
-//         });
-//     }
-//     catch (error) {
-//         console.log('Error while updating profile');
-//         console.log(error);
-//         res.status(500).json({
-//             success: false,
-//             error: error.message,
-//             message: 'Error while updating profile'
-//         })
-//     }
-// }
 
 // ================ delete Account ================
 exports.deleteAccount = async (req, res) => {
@@ -301,23 +310,6 @@ exports.getEnrolledCourses = async (req, res) => {
     });
   }
 };
-exports.instructorDashboard = async (req, res) => {
-  try {
-    const courseData = await getInstructorDashboardService(req.user.id);
-
-    res.status(200).json({
-      success: true,
-      courses: courseData,
-      message: "Instructor Dashboard Data fetched successfully",
-    });
-  } catch (error) {
-    console.error("❌ Error fetching instructor dashboard:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Server Error",
-    });
-  }
-};
 // exports.getEnrolledCourses = async (req, res) => {
 //     try {
 //         const userId = req.user.id
@@ -383,6 +375,23 @@ exports.instructorDashboard = async (req, res) => {
 //         })
 //     }
 // }
+exports.instructorDashboard = async (req, res) => {
+  try {
+    const courseData = await getInstructorDashboardService(req.user.id);
+
+    res.status(200).json({
+      success: true,
+      courses: courseData,
+      message: "Instructor Dashboard Data fetched successfully",
+    });
+  } catch (error) {
+    console.error("❌ Error fetching instructor dashboard:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Server Error",
+    });
+  }
+};
 // ================ instructor Dashboard ================
 // exports.instructorDashboard = async (req, res) => {
 //   try {
@@ -414,4 +423,3 @@ exports.instructorDashboard = async (req, res) => {
 //     res.status(500).json({ message: "Server Error" });
 //   }
 // };
-// controllers/profile.js

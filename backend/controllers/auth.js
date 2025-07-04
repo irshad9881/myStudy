@@ -51,7 +51,7 @@ exports.sendOTP = async (req, res) => {
 
     // create an entry for otp in DB
     const otpBody = await OTP.create({ email, otp });
-    // console.log('otpBody - ', otpBody);
+    console.log("otpBody - ", otpBody);
 
     // return response successfully
     res.status(200).json({
@@ -108,10 +108,10 @@ exports.signup = async (req, res) => {
           "password & confirm password does not match, Please try again..!",
       });
     }
-
+    console.log("Email - ", email);
     // check user have registered already
     const checkUserAlreadyExits = await User.findOne({ email });
-
+    console.log("checkUserAlreadyExits - ", checkUserAlreadyExits);
     // if yes ,then say to login
     if (checkUserAlreadyExits) {
       return res.status(400).json({
@@ -133,6 +133,7 @@ exports.signup = async (req, res) => {
     // .limit(1): It limits the number of documents returned to 1.
 
     // if otp not found
+    console.log(recentOtp);
     if (!recentOtp || recentOtp.length == 0) {
       return res.status(400).json({
         success: false,
@@ -320,7 +321,7 @@ exports.changePassword = async (req, res) => {
           `Password updated successfully for ${updatedUserDetails.firstName} ${updatedUserDetails.lastName}`
         )
       );
-      // console.log("Email sent successfully:", emailResponse);
+      console.log("Email sent successfully:", emailResponse);
     } catch (error) {
       console.error("Error occurred while sending email:", error);
       return res.status(500).json({

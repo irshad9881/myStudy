@@ -19,9 +19,9 @@ exports.capturePayment = async (req, res) => {
   const { coursesId } = req.body;
   // console.log('coursesId = ', typeof (coursesId))
   // console.log('coursesId = ', coursesId)
-
+   console.log("coursesId = ", coursesId);
   const userId = req.user.id;
-
+  console.log("userId = ", userId);
   // if (coursesId.length === 0) {
   //   return res
   //     .status(400)
@@ -125,7 +125,12 @@ exports.verifyPayment = async (req, res) => {
     const razorpay_signature = req.body?.razorpay_signature;
     const courses = req.body?.coursesId;
     const userId = req.user.id;
-
+  console.log("req.body === ", req.body);
+    console.log("razorpay_order_id === ", razorpay_order_id);
+    console.log("razorpay_payment_id === ", razorpay_payment_id);
+    console.log("razorpay_signature === ", razorpay_signature);   
+    console.log("courses === ", courses);
+    console.log("userId === ", userId);
     if (
       !razorpay_order_id ||
       !razorpay_payment_id ||

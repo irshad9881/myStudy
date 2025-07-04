@@ -17,16 +17,18 @@ const {
 // ********************************************************************************************************
 //                                      Profile routes
 // ********************************************************************************************************
-
+// router.get("/test", (req, res) => {
+//   res.json({ message: "Profile route working" });
+// });
 // Delete User Account
 router.delete("/deleteProfile", auth, deleteAccount);
-// router.put("/updateProfile", auth, updateProfile);
-router.put(
-  "/updateProfile",
-  auth,
-  validateRequest(updateProfileSchema),
-  updateProfile
-);
+router.put("/updateProfile", auth, updateProfile);
+// router.put(
+//   "/updateProfile",
+//   auth,
+// validateRequest(updateProfileSchema),
+//   updateProfile
+// );
 router.get("/getUserDetails", auth, getUserDetails);
 
 // Get Enrolled Courses

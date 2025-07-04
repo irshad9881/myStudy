@@ -8,6 +8,7 @@ import { fetchCourseCategories } from "./../../services/operations/courseDetails
 
 import ProfileDropDown from "../core/Auth/ProfileDropDown";
 import MobileProfileDropDown from "../core/Auth/MobileProfileDropDown";
+import { ACCOUNT_TYPE } from "../../utils/constants";
 
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { MdKeyboardArrowDown } from "react-icons/md";
@@ -145,7 +146,7 @@ const Navbar = () => {
 
         {/* Login/SignUp/Dashboard */}
         <div className="flex gap-x-4 items-center">
-          {user && user?.accountType !== "Instructor" && (
+          {user && user?.accountType !== ACCOUNT_TYPE.INSTRUCTOR && (
             <Link to="/dashboard/cart" className="relative">
               <AiOutlineShoppingCart className="text-[2.35rem] text-richblack-5 hover:bg-richblack-700 rounded-full p-2 duration-200" />
               {totalItems > 0 && (
