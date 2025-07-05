@@ -125,7 +125,7 @@ exports.verifyPayment = async (req, res) => {
     const razorpay_signature = req.body?.razorpay_signature;
     const courses = req.body?.coursesId;
     const userId = req.user.id;
-  console.log("req.body === ", req.body);
+    console.log("req.body === ", req.body);
     console.log("razorpay_order_id === ", razorpay_order_id);
     console.log("razorpay_payment_id === ", razorpay_payment_id);
     console.log("razorpay_signature === ", razorpay_signature);   

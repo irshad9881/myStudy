@@ -29,8 +29,8 @@ exports.createSubSection = async (req, res) => {
       !title ||
       !description ||
       !videoFile ||
-      !sectionId ||
-      !timeDuration
+      !sectionId
+      // !timeDuration
       // !videoUrl
     ) {
       return res.status(400).json({

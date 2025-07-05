@@ -67,7 +67,8 @@ exports.showAllCategories = async (req, res) => {
 // ================ Get Category Page Details ================
 exports.getCategoryPageDetails = async (req, res) => {
   try {
-    const categoryId = req.params.categoryId;
+    const categoryId = req.params?.categoryId;
+    console.log("req.params :", req.params);
     console.log("Category ID received:", categoryId);
 
     // console.log("PRINTING CATEGORY ID: ", categoryId);
@@ -100,15 +101,28 @@ exports.getCategoryPageDetails = async (req, res) => {
       });
     }
 
-    // Get courses for other categories
-    const categoriesExceptSelected = await Category.findOne({
+    // // Get courses for other categories
+    // const categoriesExceptSelected = await Category.findOne({
+    //   _id: { $ne: categoryId },
+    // });
+
+    // let differentCategory = await Category.findOne(
+    //   categoriesExceptSelected[getRandomInt(categoriesExceptSelected.length)]
+    //     ._id
+    // )
+    //   .populate({
+    //     path: "courses",
+    //     match: { status: "Published" },
+    //   })
+    //   .exec();
+    const categoriesExceptSelected = await Category.find({
       _id: { $ne: categoryId },
     });
 
-    let differentCategory = await Category.findOne(
-      categoriesExceptSelected[getRandomInt(categoriesExceptSelected.length)]
-        ._id
-    )
+    const randomIndex = getRandomInt(categoriesExceptSelected.length);
+    const randomCategoryId = categoriesExceptSelected[randomIndex]._id;
+
+    let differentCategory = await Category.findById(randomCategoryId)
       .populate({
         path: "courses",
         match: { status: "Published" },
