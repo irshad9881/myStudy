@@ -1,5 +1,5 @@
 const BASE_URL =
-  import.meta.env.VITE_APP_BASE_URL ||"https://mystudy-backend.onrender.com"|| "http://localhost:8080/api/v1";
+  import.meta.env.VITE_APP_BASE_URL ||"https://mystudy-backend.onrender.com"
 
 // AUTH ENDPOINTS
 export const endpoints = {
