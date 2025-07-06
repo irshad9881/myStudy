@@ -34,7 +34,7 @@ exports.resetPasswordToken = async (req, res) => {
     user.resetPasswordTokenExpires = Date.now() + 5 * 60 * 1000; // 5 mins
     await user.save();
 
-    const baseUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const baseUrl = process.env.FRONTEND_URL ||"https://mystudy-frontend.onrender.com" || "http://localhost:5173";
     const url = `${baseUrl}/update-password/${token}`;
     console.log("url :", url);
     // send email containing url
