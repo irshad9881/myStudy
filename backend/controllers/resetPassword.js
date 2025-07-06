@@ -29,7 +29,7 @@ exports.resetPasswordToken = async (req, res) => {
     //     { new: true }); // by marking true, it will return updated user
 
     // // create url
-    // const url = `https://study-notion-mern-stack.netlify.app/update-password/${token}`;
+    // const url = `https://iqraLight.netlify.app/update-password/${token}`;
     user.token = token;
     user.resetPasswordTokenExpires = Date.now() + 5 * 60 * 1000; // 5 mins
     await user.save();
