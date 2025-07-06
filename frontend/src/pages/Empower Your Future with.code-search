@@ -1,0 +1,9 @@
+# Query: Empower Your Future with
+# ContextLines: 1
+
+1 result - 1 file
+
+frontend\src\pages\Home.jsx:
+  129            >
+  130:             Light the Way to Success with 
+  131              <HighlightText text={"Coding Skills"} />
